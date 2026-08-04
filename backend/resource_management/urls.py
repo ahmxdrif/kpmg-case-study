@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     HelloView, ClientViewSet, ProjectManagerViewSet, ConsultantViewSet,
-    ProjectViewSet, TaskViewSet, AuditViewSet, TimesheetViewSet, MeView
+    ProjectViewSet, TaskViewSet, AuditViewSet, TimesheetViewSet, MeView, DashboardMetricsView
 )
 
 router = DefaultRouter()
@@ -18,4 +18,5 @@ urlpatterns = [
     path('hello/', HelloView.as_view()),
     path('me/', MeView.as_view()),
     path('', include(router.urls)),
+    path('dashboard/metrics/', DashboardMetricsView.as_view()),
 ]

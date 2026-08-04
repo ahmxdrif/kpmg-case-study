@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
-
 from .models import Client, ProjectManager, Consultant, Project, ProjectAssignment, Task, Audit, Timesheet
 from .serializers import (
     ClientSerializer, ProjectManagerSerializer, ConsultantSerializer,
@@ -13,6 +12,7 @@ from .serializers import (
 from .permissions import (
     IsProjectManagerOrReadOnly, TaskPermission, TimesheetPermission
 )
+from django.core.cache import cache
 class HelloView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -125,3 +125,24 @@ class MeView(APIView):
             "is_consultant": hasattr(user, 'consultant'),
             "is_admin": user.is_staff,
         })
+
+class DashboardMetricsView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        cached_data = cache.get('dashboard_metrics')
+        if cached_data:
+            return Response({**cached_data, "cached": True}) #i added True for demo-ing purposes
+        
+        data = {
+            "total_projects": Project.objects.count(),
+            "total_consultants": Consultant.objects.count(),
+            "total_tasks": Task.objects.count(),
+            "tasks_completed": Task.objects.filter(status='completed').count(),
+            "tasks_pending": Task.objects.filter(status='pending').count(),
+            "tasks_ahead_of_deadline": Task.objects.filter(status='ahead_of_deadline').count(),
+        }
+
+        cache.set('dashboard_metrics', data, timeout=300)
+
+        return Response({**data, "cached": False})
