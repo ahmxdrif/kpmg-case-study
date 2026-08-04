@@ -105,7 +105,7 @@ class Timesheet(models.Model):
     status = models.CharField(max_length=20, choices=TIMESHEET_STATUS_CHOICES, default='pending_review')
     notes = models.TextField(blank=True)
     approved_by = models.ForeignKey(ProjectManager, on_delete=models.SET_NULL, null=True, related_name='approved_timesheets')
-
+    attachment = models.FileField(upload_to='timesheets/%Y/%m/%d/', blank=True, null=True)
     class Meta:
         unique_together = ('consultant', 'project', 'date')
 

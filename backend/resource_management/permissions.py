@@ -14,7 +14,7 @@ class IsProjectManagerOrReadOnly(BasePermission):
             return True
         return hasattr(request.user, 'projectmanager')
 
-class TaskPermission(BasedPermission):
+class TaskPermission(BasePermission):
     def has_permission(self, request, view):
         if hasattr(request.user , 'projectmanager'):
             return True

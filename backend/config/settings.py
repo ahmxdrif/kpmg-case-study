@@ -42,7 +42,18 @@ INSTALLED_APPS = [
     'corsheaders',
     'resource_management',
     'django_filters',
+    'django_celery_beat',
 ]
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+MEDIA_URL = '/timesheets/'
+MEDIA_ROOT = BASE_DIR / 'timesheets/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'kpmg-case-study@example.com'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
