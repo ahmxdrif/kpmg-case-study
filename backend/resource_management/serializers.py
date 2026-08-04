@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, ProjectManager, Consultant, Project, Task, Audit, Timesheet
+from .models import Client, ProjectAssignment, ProjectManager, Consultant, Project, Task, Audit, Timesheet
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -25,6 +25,11 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
 
+class ProjectAssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectAssignment
+        fields = '__all__'
+
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,3 +47,4 @@ class TimesheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Timesheet
         fields = '__all__'
+        read_only_fields = ['status', 'approved_by']
