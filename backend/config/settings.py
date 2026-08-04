@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'resource_management',
     'django_filters',
     'django_celery_beat',
+    'drf_spectacular',
 ]
 
 CACHES = {
@@ -89,6 +90,13 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'KPMG Case Study API',
+    'VERSION': '1.0',
+    'DESCRIPTION': 'API for KPMG Case Study',
 }
 
 ROOT_URLCONF = 'config.urls'
