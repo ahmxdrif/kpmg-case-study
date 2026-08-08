@@ -58,6 +58,7 @@ class Consultant(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
     consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE, related_name='tasks')
