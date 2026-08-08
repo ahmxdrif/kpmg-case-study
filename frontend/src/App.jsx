@@ -38,10 +38,7 @@ function App() {
         />
         <Route path="/tasks" element={<TasksPlaceholder />} />
         <Route path="/timesheets" element={<TimesheetsPlaceholder />} />
-        <Route
-          path="/consultants"
-          element={<RoleRoute allow={['pm']}><ConsultantsPage /></RoleRoute>}
-        />
+        <Route path="/consultants" element={<RoleRoute allow={['pm']}><ConsultantsPage /></RoleRoute>} />
         <Route
           path="/clients"
           element={<RoleRoute allow={['pm']}><ClientsPage /></RoleRoute>}

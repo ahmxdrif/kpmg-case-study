@@ -15,51 +15,44 @@ function ProjectsPage() {
   const [title, setTitle] = useState('');
   const [clientId, setClientId] = useState('');
   const [expandedId, setExpandedId] = useState(null);
-  const [assignmentsByProject, setAssignmentsByProject] = useState({});
   const [selectedConsultantId, setSelectedConsultantId] = useState('');
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
 
-
-
-    const fetchProjects = async (query = '') => {
+  const fetchProjects = async (query = '') => {
     try {
-        const res = await api.get(`/projects/${query ? `?search=${query}` : ''}`);
-        setProjects(res.data.results);
+      const res = await api.get(`/projects/${query ? `?search=${query}` : ''}`);
+      setProjects(res.data.results);
     } catch (err) {
-        setError('Could not load projects.');
-    }
-    };
-
-  const fetchAssignments = async (projectId) => {
-    try {
-      const res = await api.get(`/project-assignments/?project=${projectId}`);
-      setAssignmentsByProject((prev) => ({ ...prev, [projectId]: res.data.results }));
-    } catch (err) {
-      setError('Could not load assignments.');
+      setError('Could not load projects.');
     }
   };
 
   useEffect(() => {
     fetchProjects();
     api.get('/clients/').then((res) => setClients(res.data.results));
-    api.get('/consultants/').then((res) => setConsultants(res.data.results));
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => fetchProjects(search), 300);
     return () => clearTimeout(timer);
-    }, [search]);
+  }, [search]);
+
+  // unassigned consultants only, refetched each time the form opens
+  const fetchUnassignedConsultants = async () => {
+    try {
+      const res = await api.get('/consultants/');
+      setConsultants(res.data.results.filter((c) => !c.project));
+    } catch (err) {
+      setError('Could not load consultants.');
+    }
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      await api.post('/projects/', {
-        title,
-        client: clientId,
-        project_manager: user.project_manager,
-      });
+      await api.post('/projects/', { title, client: clientId });
       setTitle('');
       setClientId('');
       setShowForm(false);
@@ -69,37 +62,37 @@ function ProjectsPage() {
     }
   };
 
-  const toggleExpand = (projectId) => {
-    if (expandedId === projectId) {
+  const toggleExpand = (project) => {
+    if (expandedId === project.id) {
       setExpandedId(null);
     } else {
-      setExpandedId(projectId);
-      if (!assignmentsByProject[projectId]) fetchAssignments(projectId);
+      setExpandedId(project.id);
+      fetchUnassignedConsultants();
     }
   };
+
+  const isOwner = (project) => project.project_manager_username === user?.username;
 
   const handleAssign = async (projectId) => {
     if (!selectedConsultantId) return;
     setError('');
     try {
-      await api.post('/project-assignments/', {
-        project: projectId,
-        consultant: selectedConsultantId,
-      });
+      await api.post(`/projects/${projectId}/assign_consultant/`, { consultant: selectedConsultantId });
       setSelectedConsultantId('');
-      fetchAssignments(projectId);
+      fetchProjects();
+      fetchUnassignedConsultants();
     } catch (err) {
-      setError('Could not assign consultant. They may already be assigned.');
+      setError(err.response?.data?.detail || 'Could not assign consultant.');
     }
   };
 
-  const handleRemove = async (assignmentId, projectId) => {
+  const handleRemove = async (projectId, consultantId) => {
     setError('');
     try {
-      await api.delete(`/project-assignments/${assignmentId}/`);
-      fetchAssignments(projectId);
+      await api.post(`/projects/${projectId}/remove_consultant/`, { consultant: consultantId });
+      fetchProjects();
     } catch (err) {
-      setError('Could not remove consultant.');
+      setError(err.response?.data?.detail || 'Could not remove consultant.');
     }
   };
 
@@ -107,16 +100,15 @@ function ProjectsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2>Projects</h2>
-        {user?.is_project_manager && (
-          <Button onClick={() => setShowForm((v) => !v)}>
-            {showForm ? 'Cancel' : '+ New Project'}
-          </Button>
-        )}
+        <Button onClick={() => setShowForm((v) => !v)}>
+          {showForm ? 'Cancel' : '+ New Project'}
+        </Button>
       </div>
+
       <SearchBar value={search} onChange={setSearch} onSearch={() => fetchProjects(search)} placeholder="Search projects..." />
 
       {showForm && (
-        <Card style={{ marginBottom: 20, maxWidth: 400 }}>
+        <Card style={{ marginTop: 16, marginBottom: 20, maxWidth: 400 }}>
           <form onSubmit={handleCreate}>
             <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
             <div style={{ marginBottom: 12 }}>
@@ -124,14 +116,17 @@ function ProjectsPage() {
               <select
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
-                style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ccc' }}
+                style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--border)' }}
               >
                 <option value="">Select a client</option>
                 {clients.map((c) => (
-                    <option key={c.id} value={c.id}>{c.username}</option>
+                  <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+              This project will be assigned to you automatically.
+            </p>
             <Button type="submit">Create</Button>
           </form>
         </Card>
@@ -139,47 +134,62 @@ function ProjectsPage() {
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
         {projects.map((p) => (
-          <Card key={p.id}>
+          <Card key={p.id} clickable>
             <div
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
-              onClick={() => toggleExpand(p.id)}
+              onClick={() => toggleExpand(p)}
             >
               <div>
                 <div style={{ fontWeight: 600 }}>{p.title}</div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Project #{p.id}</div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                  {p.client_name} · {p.client_industry}
+                </div>
               </div>
               <span>{expandedId === p.id ? '▲' : '▼'}</span>
             </div>
 
             {expandedId === p.id && (
               <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Assigned Consultants</div>
+                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>
+                  Assigned Consultants ({p.consultants_detail.length})
+                </div>
 
-                {(assignmentsByProject[p.id] || []).map((a) => (
-                  <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
-                    <span>{a.consultant_username}</span>
-                    {user?.is_project_manager && (
-                      <Button variant="danger" onClick={() => handleRemove(a.id, p.id)}>Remove</Button>
+                {p.consultants_detail.length === 0 && (
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>No consultants assigned yet.</p>
+                )}
+
+                {p.consultants_detail.map((c) => (
+                  <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+                    <span style={{ fontSize: 14 }}>
+                      {c.username}
+                      <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}> · assigned {new Date(c.assigned_at).toLocaleDateString()}</span>
+                    </span>
+                    {isOwner(p) && (
+                      <Button variant="danger" onClick={() => handleRemove(p.id, c.id)}>Remove</Button>
                     )}
                   </div>
                 ))}
 
-                {user?.is_project_manager && (
+                {isOwner(p) ? (
                   <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                     <select
                       value={selectedConsultantId}
                       onChange={(e) => setSelectedConsultantId(e.target.value)}
-                      style={{ flex: 1, padding: 8, borderRadius: 6, border: '1px solid #ccc' }}
+                      style={{ flex: 1, padding: 8, borderRadius: 6, border: '1px solid var(--border)' }}
                     >
-                      <option value="">Select a consultant to add</option>
+                      <option value="">Select an unassigned consultant</option>
                       {consultants.map((c) => (
                         <option key={c.id} value={c.id}>{c.username}</option>
                       ))}
                     </select>
                     <Button onClick={() => handleAssign(p.id)}>Assign</Button>
                   </div>
+                ) : (
+                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 12 }}>
+                    Managed by {p.project_manager_username} — you can't edit this project.
+                  </p>
                 )}
               </div>
             )}

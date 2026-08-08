@@ -50,6 +50,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id', 'title', 'client', 'client_name', 'client_industry',
             'project_manager', 'project_manager_username', 'consultants_detail', 'created_at'
         ]
+        read_only_fields = ['project_manager']
 
     def get_client_name(self, obj):
         return obj.client.name
