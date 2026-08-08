@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     HelloView, ClientViewSet, ProjectManagerViewSet, ConsultantViewSet,
-    ProjectViewSet, TaskViewSet, AuditViewSet, TimesheetViewSet, MeView, DashboardMetricsView, ProjectAssignmentViewSet
+    ProjectViewSet, TaskViewSet, TimesheetViewSet, MeView, DashboardMetricsView
 )
 
 router = DefaultRouter()
@@ -10,9 +10,7 @@ router.register('clients', ClientViewSet)
 router.register('project-managers', ProjectManagerViewSet)
 router.register('consultants', ConsultantViewSet)
 router.register('projects', ProjectViewSet)
-router.register('project-assignments', ProjectAssignmentViewSet)
 router.register('tasks', TaskViewSet)
-router.register('audits', AuditViewSet)
 router.register('timesheets', TimesheetViewSet)
 
 urlpatterns = [

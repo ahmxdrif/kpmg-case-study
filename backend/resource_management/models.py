@@ -40,37 +40,23 @@ class ProjectManager(models.Model):
 
     def __str__(self):
         return self.user.username
-
-
-class Consultant(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
-    weekly_hours_capacity = models.IntegerField(default=40)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.user.username
-
-
 class Project(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projects')
     title = models.CharField(max_length=255)
-    project_manager = models.ForeignKey(ProjectManager, on_delete=models.CASCADE, related_name='projects')
-    consultants = models.ManyToManyField(Consultant, through='ProjectAssignment', related_name='projects')
+    project_manager = models.OneToOneField(ProjectManager, on_delete=models.CASCADE, related_name='project')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
-class ProjectAssignment(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='assignments')
-    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE, related_name='assignments')
-    assigned_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('project', 'consultant')
+class Consultant(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    weekly_hours_capacity = models.IntegerField(default=40)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultants')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.consultant} on {self.project}"
+        return self.user.username
 
 class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
@@ -84,17 +70,6 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.status}) - {self.project.title}"
-
-
-class Audit(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='audits')
-    consultant = models.ForeignKey(Consultant, on_delete=models.CASCADE, related_name='audits', null=True, blank=True)
-    action = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.action
-
 
 class Timesheet(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='timesheets')

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, ProjectAssignment, ProjectManager, Consultant, Project, Task, Audit, Timesheet
+from .models import Client, ProjectManager, Consultant, Project, Task, Timesheet
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -9,49 +9,66 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class ProjectManagerSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
     class Meta:
         model = ProjectManager
-        fields = '__all__'
-
-
-class ConsultantSerializer(serializers.ModelSerializer):
-    username = serializers.SerializerMethodField()
-    projects = serializers.SerializerMethodField()
-    class Meta:
-        model = Consultant
-        fields = ['id', 'user', 'username', 'weekly_hours_capacity', 'created_at', 'projects']
+        fields = ['id', 'user', 'username', 'created_at']
 
     def get_username(self, obj):
         return obj.user.username
 
-    def get_projects(self, obj):
-        return [p.title for p in obj.projects.all()]
+
+class ConsultantSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+    project_title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Consultant
+        fields = ['id', 'user', 'username', 'email', 'weekly_hours_capacity', 'project', 'project_title', 'created_at']
+
+    def get_username(self, obj):
+        return obj.user.username
+
+    def get_email(self, obj):
+        return obj.user.email
+
+    def get_project_title(self, obj):
+        return obj.project.title if obj.project else None
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    client_name = serializers.SerializerMethodField()
+    client_industry = serializers.SerializerMethodField()
+    project_manager_username = serializers.SerializerMethodField()
+    consultants_detail = serializers.SerializerMethodField()
+
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = [
+            'id', 'title', 'client', 'client_name', 'client_industry',
+            'project_manager', 'project_manager_username', 'consultants_detail', 'created_at'
+        ]
 
-class ProjectAssignmentSerializer(serializers.ModelSerializer):
-    consultant_username = serializers.SerializerMethodField()
-    class Meta:
-        model = ProjectAssignment
-        fields = ['id', 'project', 'consultant', 'consultant_username', 'assigned_at']
-    
-    def get_consultant_username(self, obj):
-        return obj.consultant.user.username
+    def get_client_name(self, obj):
+        return obj.client.name
 
+    def get_client_industry(self, obj):
+        return obj.client.get_industry_display()
+
+    def get_project_manager_username(self, obj):
+        return obj.project_manager.user.username
+
+    def get_consultants_detail(self, obj):
+        return [
+            {"id": c.id, "username": c.user.username, "assigned_at": c.created_at}
+            for c in obj.consultants.all()
+        ]
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = '__all__'
-
-
-class AuditSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Audit
         fields = '__all__'
 
 
