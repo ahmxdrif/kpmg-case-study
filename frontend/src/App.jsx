@@ -1,60 +1,51 @@
-import { useState } from 'react';
-import axios from 'axios';
-import api from './api';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import Dashboard from './pages/DashboardPage';
+import ProtectedRoute from './ProtectedRoute';
+import Layout from './components/Layout';
+
+function ProfilePlaceholder() {
+  return <h2>Profile (coming next)</h2>;
+}
+function ProjectsPlaceholder() {
+  return <h2>Projects (coming next)</h2>;
+}
+function TasksPlaceholder() {
+  return <h2>Tasks (coming next)</h2>;
+}
+function TimesheetsPlaceholder() {
+  return <h2>Timesheets (coming next)</h2>;
+}
+function ConsultantsPlaceholder() {
+  return <h2>Consultants (coming next)</h2>;
+}
+function ClientsPlaceholder() {
+  return <h2>Clients (coming next)</h2>;
+}
 
 function App() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [clients, setClients] = useState([]);
-  const [error, setError] = useState('');
-
-  const login = async () => {
-    setError('');
-    try {
-      const res = await axios.post('http://localhost:8000/api/token/', { username, password });
-      localStorage.setItem('access', res.data.access);
-      localStorage.setItem('refresh', res.data.refresh);
-      setLoggedIn(true);
-    } catch (err) {
-      setError('Login failed. Check your username/password.');
-    }
-  };
-
-  const fetchClients = async () => {
-    setError('');
-    try {
-      const res = await api.get('/clients/');
-      setClients(res.data.results); // paginated response
-    } catch (err) {
-      setError('Could not fetch clients. Are you logged in?');
-    }
-  };
-
   return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <h2>Project & Resource Management</h2>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
 
-      {!loggedIn ? (
-        <div>
-          <input placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} />
-          <input placeholder="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button onClick={login}>Login</button>
-        </div>
-      ) : (
-        <div>
-          <p>Logged in.</p>
-          <button onClick={fetchClients}>Fetch clients</button>
-          <ul>
-            {clients.map((c) => (
-              <li key={c.id}>{c.name} — {c.industry}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <Route
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<ProfilePlaceholder />} />
+        <Route path="/projects" element={<ProjectsPlaceholder />} />
+        <Route path="/tasks" element={<TasksPlaceholder />} />
+        <Route path="/timesheets" element={<TimesheetsPlaceholder />} />
+        <Route path="/consultants" element={<ConsultantsPlaceholder />} />
+        <Route path="/clients" element={<ClientsPlaceholder />} />
+      </Route>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </div>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }
 
