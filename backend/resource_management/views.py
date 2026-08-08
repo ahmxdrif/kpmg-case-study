@@ -47,7 +47,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsProjectManagerOrReadOnly]
-    filterset_fields = ['client', 'project_manager']
+    filterset_fields = ['client', 'project_manager', 'consultants']
     search_fields = ['title']
     ordering_fields = ['created_at']
 
@@ -143,7 +143,7 @@ class DashboardMetricsView(APIView):
             "total_projects": Project.objects.count(),
             "total_consultants": Consultant.objects.count(),
             "total_tasks": Task.objects.count(),
-            "tasks_completed": Task.objects.filter(status='completed').count(),
+            "tasks_completed": Task.objects.filter(status='complete').count(),
             "tasks_pending": Task.objects.filter(status='pending').count(),
             "tasks_ahead_of_deadline": Task.objects.filter(status='ahead_of_deadline').count(),
         }

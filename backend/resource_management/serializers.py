@@ -15,9 +15,17 @@ class ProjectManagerSerializer(serializers.ModelSerializer):
 
 
 class ConsultantSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    projects = serializers.SerializerMethodField()
     class Meta:
         model = Consultant
-        fields = '__all__'
+        fields = ['id', 'user', 'username', 'weekly_hours_capacity', 'created_at', 'projects']
+
+    def get_username(self, obj):
+        return obj.user.username
+
+    def get_projects(self, obj):
+        return [p.title for p in obj.projects.all()]
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -26,9 +34,13 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProjectAssignmentSerializer(serializers.ModelSerializer):
+    consultant_username = serializers.SerializerMethodField()
     class Meta:
         model = ProjectAssignment
-        fields = '__all__'
+        fields = ['id', 'project', 'consultant', 'consultant_username', 'assigned_at']
+    
+    def get_consultant_username(self, obj):
+        return obj.consultant.user.username
 
 
 class TaskSerializer(serializers.ModelSerializer):

@@ -5,7 +5,7 @@ function Card({ children, style = {} }) {
         border: '1px solid #e5e7eb',
         borderRadius: 8,
         padding: 16,
-        background: '#fff',
+        background: 'var(--bg)',
         ...style,
       }}
     >

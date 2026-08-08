@@ -4,8 +4,9 @@ import { useAuth } from '../AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import SearchBar from '../components/SearchBar';
 
-function Projects() {
+function ProjectsPage() {
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
@@ -17,15 +18,18 @@ function Projects() {
   const [assignmentsByProject, setAssignmentsByProject] = useState({});
   const [selectedConsultantId, setSelectedConsultantId] = useState('');
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
 
-  const fetchProjects = async () => {
+
+
+    const fetchProjects = async (query = '') => {
     try {
-      const res = await api.get('/projects/');
-      setProjects(res.data.results);
+        const res = await api.get(`/projects/${query ? `?search=${query}` : ''}`);
+        setProjects(res.data.results);
     } catch (err) {
-      setError('Could not load projects.');
+        setError('Could not load projects.');
     }
-  };
+    };
 
   const fetchAssignments = async (projectId) => {
     try {
@@ -42,6 +46,11 @@ function Projects() {
     api.get('/consultants/').then((res) => setConsultants(res.data.results));
   }, []);
 
+    useEffect(() => {
+    const timer = setTimeout(() => fetchProjects(search), 300);
+    return () => clearTimeout(timer);
+    }, [search]);
+
   const handleCreate = async (e) => {
     e.preventDefault();
     setError('');
@@ -49,7 +58,7 @@ function Projects() {
       await api.post('/projects/', {
         title,
         client: clientId,
-        project_manager: user.project_manager_id,
+        project_manager: user.project_manager,
       });
       setTitle('');
       setClientId('');
@@ -104,6 +113,7 @@ function Projects() {
           </Button>
         )}
       </div>
+      <SearchBar value={search} onChange={setSearch} onSearch={() => fetchProjects(search)} placeholder="Search projects..." />
 
       {showForm && (
         <Card style={{ marginBottom: 20, maxWidth: 400 }}>
@@ -118,7 +128,7 @@ function Projects() {
               >
                 <option value="">Select a client</option>
                 {clients.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id}>{c.username}</option>
                 ))}
               </select>
             </div>
@@ -149,7 +159,7 @@ function Projects() {
 
                 {(assignmentsByProject[p.id] || []).map((a) => (
                   <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
-                    <span>Consultant #{a.consultant}</span>
+                    <span>{a.consultant_username}</span>
                     {user?.is_project_manager && (
                       <Button variant="danger" onClick={() => handleRemove(a.id, p.id)}>Remove</Button>
                     )}
@@ -165,7 +175,7 @@ function Projects() {
                     >
                       <option value="">Select a consultant to add</option>
                       {consultants.map((c) => (
-                        <option key={c.id} value={c.id}>Consultant #{c.id} ({c.user})</option>
+                        <option key={c.id} value={c.id}>{c.username}</option>
                       ))}
                     </select>
                     <Button onClick={() => handleAssign(p.id)}>Assign</Button>
@@ -180,4 +190,4 @@ function Projects() {
   );
 }
 
-export default Projects;
+export default ProjectsPage;

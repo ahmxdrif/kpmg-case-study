@@ -41,9 +41,36 @@ function Header() {
       <button
         onClick={toggleTheme}
         title="Toggle dark mode"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}
+        role="switch"
+        aria-checked={theme === 'dark'}
+        style={{
+          position: 'relative',
+          width: 51,
+          height: 31,
+          borderRadius: 15.5,
+          border: 'none',
+          cursor: 'pointer',
+          padding: 0,
+          background: theme === 'dark' ? '#34c759' : '#e9e9eb',
+          transition: 'background 0.2s ease',
+          display: 'inline-flex',
+          alignItems: 'center',
+          flexShrink: 0,
+        }}
       >
-        {theme === 'light' ? '🌙' : '☀️'}
+        <span
+          style={{
+            position: 'absolute',
+            left: theme === 'dark' ? 22 : 2,
+            top: 2,
+            width: 27,
+            height: 27,
+            borderRadius: '50%',
+            background: '#fff',
+            boxShadow: '0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.1)',
+            transition: 'left 0.2s ease',
+          }}
+        />
       </button>
 
       <div style={{ position: 'relative' }} ref={menuRef}>

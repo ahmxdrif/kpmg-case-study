@@ -4,27 +4,30 @@ import { useAuth } from '../AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import SearchBar from '../components/SearchBar';
 
-function Clients() {
+function ClientsPage() {
     const { user } = useAuth();
     const [clients, setClients] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [name, setName] = useState('');
     const [industry, setIndustry] = useState('other');
     const [error, setError] = useState('');
+    const [search, setSearch] = useState('');
     
-    const fetchClients = async () => {
-        try {
-            const res = await api.get('/clients/');
-            setClients(res.data.results);
-        } catch (err) {
-            setError('Could not load clients');
-        }
+    const fetchClients = async (query = '') => {
+    try {
+        const res = await api.get(`/clients/${query ? `?search=${query}` : ''}`);
+        setClients(res.data.results);
+    } catch (err) {
+        setError('Could not load clients.');
+    }
     };
 
-    useEffect(()=> {
-        fetchClients();
-    }, []);
+    useEffect(() => {
+    const timer = setTimeout(() => fetchClients(search), 300);
+    return () => clearTimeout(timer);
+    }, [search]);
 
     const handleCreate = async () => {
         e.preventDefault();
@@ -50,7 +53,7 @@ function Clients() {
           </Button>
         )}
       </div>
-
+      <SearchBar value={search} onChange={setSearch} placeholder='Search clients...'/>
       {showForm && (
         <Card style={{ marginBottom: 20, maxWidth: 400 }}>
           <form onSubmit={handleCreate}>
@@ -87,4 +90,4 @@ function Clients() {
   );
 }
 
-export default Clients;
+export default ClientsPage;

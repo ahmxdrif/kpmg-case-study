@@ -1,16 +1,25 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/projects', label: 'Projects' },
-  { to: '/tasks', label: 'Tasks' },
-  { to: '/timesheets', label: 'Timesheets' },
-  { to: '/consultants', label: 'Consultants' },
-  { to: '/clients', label: 'Clients' },
-];
-
 function Sidebar({ collapsed, onToggle }) {
+    const { user } = useAuth();
+    const navItems = [
+    { to: '/dashboard', label: 'Dashboard', allow: ['pm', 'consultant'] },
+    { to: '/projects', label: 'Projects', allow: ['pm'] },
+    { to: '/tasks', label: 'Tasks', allow: ['pm', 'consultant'] },
+    { to: '/timesheets', label: 'Timesheets', allow: ['pm', 'consultant'] },
+    { to: '/consultants', label: 'Consultants', allow: ['pm'] },
+    { to: '/clients', label: 'Clients', allow: ['pm'] },
+    ];
+
+    const visibleItems = navItems.filter((item) => {
+      const isPM = user?.is_project_manager && item.allow.includes('pm');
+      const isConsultant = user?.is_consultant && item.allow.includes('consultant');
+      return isPM || isConsultant;
+    });
+
+
+
   return (
     <div
       style={{
@@ -42,7 +51,7 @@ function Sidebar({ collapsed, onToggle }) {
       </button>
 
       <nav style={{ flex: 1, padding: '8px 8px' }}>
-        {navItems.map((item) => (
+        {visibleItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

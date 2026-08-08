@@ -1,31 +1,21 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import Dashboard from './pages/DashboardPage';
+import DashboardPage from './pages/DashboardPage';
 import ProtectedRoute from './ProtectedRoute';
 import Layout from './components/Layout';
-import Consultants from './pages/ConsultantsPage';
-import Clients from './pages/ClientsPage';
-import Projects from './pages/ProjectsPage';
+import ConsultantsPage from './pages/ConsultantsPage';
+import ClientsPage from './pages/ClientsPage';
+import ProjectsPage from './pages/ProjectsPage';
+import RoleRoute from './RoleRoute';
+import ProfilePage from './pages/ProfilePage';
 
 
 
-function ProfilePlaceholder() {
-  return <h2>Profile (coming next)</h2>;
-}
-function ProjectsPlaceholder() {
-  return <h2>Projects (coming next)</h2>;
-}
 function TasksPlaceholder() {
   return <h2>Tasks (coming next)</h2>;
 }
 function TimesheetsPlaceholder() {
   return <h2>Timesheets (coming next)</h2>;
-}
-function ConsultantsPlaceholder() {
-  return <h2>Consultants (coming next)</h2>;
-}
-function ClientsPlaceholder() {
-  return <h2>Clients (coming next)</h2>;
 }
 
 function App() {
@@ -40,14 +30,22 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<ProfilePlaceholder />} />
-        <Route path="/projects" element={<ProjectsPlaceholder />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/projects"
+          element={<RoleRoute allow={['pm']}><ProjectsPage /></RoleRoute>}
+        />
         <Route path="/tasks" element={<TasksPlaceholder />} />
         <Route path="/timesheets" element={<TimesheetsPlaceholder />} />
-        <Route path="/consultants" element={<Consultants />} />
-        <Route path="/clients" element={<Clients />} />
-        <Route path="/projects" element={<Projects />} />
+        <Route
+          path="/consultants"
+          element={<RoleRoute allow={['pm']}><ConsultantsPage /></RoleRoute>}
+        />
+        <Route
+          path="/clients"
+          element={<RoleRoute allow={['pm']}><ClientsPage /></RoleRoute>}
+        />
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
