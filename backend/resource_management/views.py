@@ -119,12 +119,17 @@ class MeView(APIView):
 
     def get(self,request):
         user = request.user
-        return Response({
+        data = {
             "username": user.username,
             "is_project_manager": hasattr(user, 'projectmanager'),
             "is_consultant": hasattr(user, 'consultant'),
             "is_admin": user.is_staff,
-        })
+        }
+        if hasattr(user, 'projectmanager'):
+            data['project_manager'] = user.projectmanager.id
+        if hasattr(user, 'consultant'):
+            data['consultant'] = user.consultant.id
+        return Response(data)
 
 class DashboardMetricsView(APIView):
     permission_classes = [IsAuthenticated]

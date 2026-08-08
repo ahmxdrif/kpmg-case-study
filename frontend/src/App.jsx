@@ -3,6 +3,11 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/DashboardPage';
 import ProtectedRoute from './ProtectedRoute';
 import Layout from './components/Layout';
+import Consultants from './pages/ConsultantsPage';
+import Clients from './pages/ClientsPage';
+import Projects from './pages/ProjectsPage';
+
+
 
 function ProfilePlaceholder() {
   return <h2>Profile (coming next)</h2>;
@@ -40,8 +45,9 @@ function App() {
         <Route path="/projects" element={<ProjectsPlaceholder />} />
         <Route path="/tasks" element={<TasksPlaceholder />} />
         <Route path="/timesheets" element={<TimesheetsPlaceholder />} />
-        <Route path="/consultants" element={<ConsultantsPlaceholder />} />
-        <Route path="/clients" element={<ClientsPlaceholder />} />
+        <Route path="/consultants" element={<Consultants />} />
+        <Route path="/clients" element={<Clients />} />
+        <Route path="/projects" element={<Projects />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
