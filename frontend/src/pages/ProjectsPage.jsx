@@ -136,7 +136,7 @@ function ProjectsPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
         {projects.map((p) => (
-          <Card key={p.id} clickable>
+          <Card key={p.id}>
             <div
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
               onClick={() => toggleExpand(p)}

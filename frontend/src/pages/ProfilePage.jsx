@@ -22,15 +22,17 @@ function ProfilePage() {
       }
     };
     if (user) fetchProjects();
+    console.log(user);
+    
   }, [user]);
 
   return (
     <div>
       <h2 style={{ marginBottom: 20 }}>Profile</h2>
-
       <Card style={{ maxWidth: 400, marginBottom: 24 }}>
         <div style={{ marginBottom: 8 }}><strong>Username:</strong> {user?.username}</div>
-        <div><strong>Role:</strong> {user?.is_project_manager ? 'Project Manager' : user?.is_consultant ? 'Consultant' : 'Unknown'}</div>
+        <div style={{ marginBottom: 8 }}><strong>Role:</strong> {user?.is_project_manager ? 'Project Manager' : user?.is_consultant ? user?.title : 'Unknown'}</div>
+        <div style={{ marginBottom: 8 }}><strong>Status:</strong> {user?.status}</div>
       </Card>
 
       <h3 style={{ marginBottom: 12 }}>

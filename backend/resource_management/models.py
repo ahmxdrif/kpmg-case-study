@@ -7,6 +7,22 @@ TASK_STATUS_CHOICES = [
     ("ahead_of_deadline", "Ahead of Deadline")
 ]
 
+CONSULTANT_TITLE_CHOICES = [
+    ("senior_developer", "Senior Developer"),
+    ("junior_developer", "Junior Developer"),
+    ("senior_manual_tester", "Senior Manual Tester"),
+    ("junior_manual_tester", "Junior Manual Tester"),
+    ("system_analyst", "System Analyst"),
+    ("business_analyst", "Business Analyst"),
+    ("consultant", "Consultant")
+]
+
+CONSULTANT_STATUS_CHOICES = [
+    ("active", "Active"),
+    ("in_training", "In Training"),
+    ("inactive", "Inactive")
+]
+
 TASK_PRIORITY_CHOICES = [
     ("low","Low"),
     ("medium","Medium"),
@@ -54,6 +70,8 @@ class Consultant(models.Model):
     weekly_hours_capacity = models.IntegerField(default=40)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultants')
     created_at = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=50, choices=CONSULTANT_TITLE_CHOICES, default='consultant')
+    status = models.CharField(max_length=20, choices=CONSULTANT_STATUS_CHOICES, default='active')
 
     def __str__(self):
         return self.user.username

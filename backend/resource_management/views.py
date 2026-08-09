@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from django.core.cache import cache
+from rest_framework.exceptions import ValidationError
 
 from .models import Client, ProjectManager, Consultant, Project, Task, Timesheet
 from .serializers import (
@@ -103,6 +104,13 @@ class TaskViewSet(viewsets.ModelViewSet):
         if hasattr(user, 'consultant'):
             return Task.objects.filter(consultant=user.consultant)
         return Task.objects.all()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if hasattr(user, 'projectmanager') and hasattr(user.projectmanager, 'project'):
+            serializer.save(project=user.projectmanager.project)
+        else:
+            raise ValidationError("You must have a project assigned before creating tasks.")
 class TimesheetViewSet(viewsets.ModelViewSet):
     queryset = Timesheet.objects.all()
     serializer_class = TimesheetSerializer
@@ -118,7 +126,11 @@ class TimesheetViewSet(viewsets.ModelViewSet):
         return Timesheet.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(consultant=self.request.user.consultant)
+        consultant = self.request.user.consultant
+        if not consultant.project:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError("You must be assigned to a project before submitting a timesheet.")
+        serializer.save(consultant=consultant, project=consultant.project)
 
     @action(detail=True, methods=['post'], permission_classes=[IsProjectManagerOrReadOnly])
     def approve(self, request, pk=None):
@@ -153,6 +165,8 @@ class MeView(APIView):
             data['project_id'] = user.projectmanager.project.id if hasattr(user.projectmanager, 'project') else None
         if hasattr(user, 'consultant'):
             data['consultant'] = user.consultant.id
+            data['title'] = user.consultant.get_title_display()
+            data['status'] = user.consultant.get_status_display()
             data['project_id'] = user.consultant.project.id if user.consultant.project else None
         return Response(data)
 

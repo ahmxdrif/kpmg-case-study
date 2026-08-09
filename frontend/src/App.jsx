@@ -8,15 +8,9 @@ import ClientsPage from './pages/ClientsPage';
 import ProjectsPage from './pages/ProjectsPage';
 import RoleRoute from './RoleRoute';
 import ProfilePage from './pages/ProfilePage';
-
-
-
-function TasksPlaceholder() {
-  return <h2>Tasks (coming next)</h2>;
-}
-function TimesheetsPlaceholder() {
-  return <h2>Timesheets (coming next)</h2>;
-}
+import TimesheetPage from './pages/TimesheetPage';
+import SubmitTimesheet from './pages/SubmitTimesheet';
+import TasksPage from './pages/TasksPage';
 
 function App() {
   return (
@@ -36,8 +30,9 @@ function App() {
           path="/projects"
           element={<RoleRoute allow={['pm']}><ProjectsPage /></RoleRoute>}
         />
-        <Route path="/tasks" element={<TasksPlaceholder />} />
-        <Route path="/timesheets" element={<TimesheetsPlaceholder />} />
+        <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/timesheets" element={<TimesheetPage />} />
+        <Route path="/timesheets/submit" element={<RoleRoute allow={['consultant']}><SubmitTimesheet /></RoleRoute>} />
         <Route path="/consultants" element={<RoleRoute allow={['pm']}><ConsultantsPage /></RoleRoute>} />
         <Route
           path="/clients"
