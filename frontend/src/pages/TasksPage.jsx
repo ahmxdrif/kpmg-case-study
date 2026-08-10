@@ -27,7 +27,10 @@ function TasksPage() {
 
   const fetchTasks = async () => {
     try {
-      const query = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
+      const params = new URLSearchParams();
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (user?.is_project_manager && user?.project_id) params.append('project', user.project_id);
+      const query = params.toString() ? `?${params.toString()}` : '';
       const res = await api.get(`/tasks/${query}`);
       setTasks(res.data.results);
     } catch (err) {
@@ -37,7 +40,7 @@ function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
-  }, [statusFilter]);
+  }, [statusFilter, user]);
 
   useEffect(() => {
     if (user?.is_project_manager) {
