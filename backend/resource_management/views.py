@@ -33,10 +33,12 @@ class ClientViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at']
 
 
+
 class ProjectManagerViewSet(viewsets.ModelViewSet):
     queryset = ProjectManager.objects.all()
     serializer_class = ProjectManagerSerializer
     permission_classes = [IsAuthenticated]
+    
 
 
 class ConsultantViewSet(viewsets.ModelViewSet):

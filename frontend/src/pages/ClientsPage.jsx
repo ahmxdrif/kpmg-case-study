@@ -29,29 +29,10 @@ function ClientsPage() {
     return () => clearTimeout(timer);
     }, [search]);
 
-    const handleCreate = async () => {
-        e.preventDefault();
-        setError('');
-        try {
-            await api.post('clients/', { name, industry });
-            setName('');
-            setIndustry('other');
-            setShowForm(false);
-            fetchClients();
-        } catch (err) {
-            setError('Could not create client');
-        }
-    };
-
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2>Clients</h2>
-        {user?.is_project_manager && (
-          <Button onClick={() => setShowForm((v) => !v)}>
-            {showForm ? 'Cancel' : '+ New Client'}
-          </Button>
-        )}
       </div>
       <SearchBar value={search} onChange={setSearch} placeholder='Search clients...'/>
       {showForm && (
